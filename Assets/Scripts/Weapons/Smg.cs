@@ -4,20 +4,36 @@ using UnityEngine;
 
 public class Smg : Weapon
 {
+    protected override void Start()
+    {
+        base.Start();  // Initialize base class variables
+    }
+
     public override void Fire()
     {
-        throw new System.NotImplementedException();
+        if (!CanFire()) return;
+
+        lastShotTime = Time.time;  // Update shot time
+        currentAmmo--;
+
+        // Logic to shoot a bullet (single shot)
+        ShootBullet();
+
+        if (currentAmmo <= 0)
+        {
+            StartCoroutine(Reload());
+        }
     }
 
-    // Start is called before the first frame update
-    protected new void Start()
-    {
-        base.Start();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    //private void ShootBullet()
+    //{
+    //    Bullet bullet = objectPool.GetPooledObject();
+    //    if (bullet != null)
+    //    {
+    //        bullet.transform.position = bulletSpawnPoint.position;
+    //        bullet.transform.rotation = bulletSpawnPoint.rotation;
+    //        bullet.SetupBullet(weaponSO.bulletSpeed, weaponSO.damage);
+    //        bullet.gameObject.SetActive(true);
+    //    }
+    //}
 }

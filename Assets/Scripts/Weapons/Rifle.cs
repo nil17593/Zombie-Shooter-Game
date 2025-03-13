@@ -7,9 +7,6 @@ public class Rifle : Weapon
     protected override void Start()
     {
         base.Start();  // Initialize base class variables
-        Debug.Log("THIS IS = " + this.name);
-        Debug.Log("THIS IS = " + firerate);
-
     }
 
     public override void Fire()
@@ -28,16 +25,15 @@ public class Rifle : Weapon
         }
     }
 
-    private void ShootBullet()
-    {
-        // Get bullet from object pool
-        //GameObject bullet = ObjectPool.Instance.GetPooledObject("Bullet");
-        //if (bullet != null)
-        //{
-        //    bullet.transform.position = bulletSpawnPoint.position;
-        //    bullet.transform.rotation = bulletSpawnPoint.rotation;
-        //    bullet.SetActive(true);
-        //    bullet.GetComponent<Bullet>().SetSpeed(weaponSO.bulletSpeed);
-        //}
-    }
+    //private new void ShootBullet()
+    //{
+    //    Bullet bullet = objectPool.GetPooledObject();
+    //    if (bullet != null)
+    //    {
+    //        bullet.transform.position = bulletSpawnPoint.position;
+    //        bullet.transform.rotation = bulletSpawnPoint.rotation;
+    //        bullet.SetupBullet(weaponSO.bulletSpeed, weaponSO.damage);
+    //        bullet.gameObject.SetActive(true);
+    //    }
+    //}
 }

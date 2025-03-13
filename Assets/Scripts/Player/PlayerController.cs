@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IDamagable
 {
     [SerializeField] private Transform weaponSpawnPoint; // Where the weapon will appear
+    [SerializeField] private float health = 100;
     private Weapon currentWeapon; // Store the currently selected weapon
 
     private void Start()
@@ -45,5 +46,35 @@ public class PlayerController : MonoBehaviour
             Debug.LogWarning("GameplayController is null");
 
         }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        health -= damage;
+        if (health <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        gameObject.SetActive(false);
+        Debug.Log("GAME OVER");
+    }
+
+    //public virtual void Die()
+    //{
+    //    isDead = true;
+    //    isAttacking = false;
+    //    PlayDeathAnimation();
+    //    StartCoroutine(DeactivateAfterDeath());
+    //}
+
+    // Coroutine to deactivate zombie after death animation
+    private IEnumerator DeactivateAfterDeath()
+    {
+        yield return new WaitForSeconds(2f);
+        gameObject.SetActive(false);
     }
 }

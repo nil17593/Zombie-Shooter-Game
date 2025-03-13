@@ -18,5 +18,5 @@ MonoBehaviour:
   magSize: 40
   reloadDuration: 2
   fireRate: 900
-  bulletSpeed: 450
+  bulletSpeed: 35
   weaponSprite: {fileID: 21300000, guid: 5331d3ef704e31f4991c2db49a49390a, type: 3}
