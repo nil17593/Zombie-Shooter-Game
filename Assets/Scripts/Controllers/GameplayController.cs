@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using SuperGaming.ZombieShooter.Event;
 
 public class GameplayController : Singletone<GameplayController>
 {
@@ -9,6 +10,13 @@ public class GameplayController : Singletone<GameplayController>
     private Dictionary<WeaponType, Weapon> weaponDictionary;
 
     public Weapon SelectedWeapon { get; private set; }
+    public int TotalZombiesToKill { get; set; }
+    public int TotalZombiesKilled { get; set; }
+
+    private void OnEnable()
+    {
+        EventManager.OnAllZombieWavesSpawned += CheckForGameWin;
+    }
 
     private void Start()
     {
@@ -63,5 +71,17 @@ public class GameplayController : Singletone<GameplayController>
     public GameObject GetCurrentWeaponPrefab()
     {
         return SelectedWeapon?.gameObject ?? weapons[0].gameObject;
+    }
+    public void CheckForGameOver()
+    {
+
+    }
+
+    public void CheckForGameWin(int count)
+    {
+        if (TotalZombiesKilled >= count)
+        {
+            EventManager.TriggerAllZombiesKilledEvent();
+        }
     }
 }

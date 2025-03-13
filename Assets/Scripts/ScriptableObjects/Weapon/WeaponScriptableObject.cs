@@ -15,4 +15,5 @@ public class WeaponScriptableObject : ScriptableObject
     public float fireRate;//RPM (Rounds Per Minute)
     public float bulletSpeed;//speed in m/s
     public Sprite weaponSprite;
+    public bool isAutomatic;
 }

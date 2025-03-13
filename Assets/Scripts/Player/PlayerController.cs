@@ -1,17 +1,26 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
+using SuperGaming.ZombieShooter.Event;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour, IDamagable
 {
+    [Header("Player Settings")]
     [SerializeField] private Transform weaponSpawnPoint; // Where the weapon will appear
     [SerializeField] private float health = 100;
+    [SerializeField] private HealthBar healthBar;
+    [SerializeField] private Animator animator;
+
+    #region Cached data
     private Weapon currentWeapon; // Store the currently selected weapon
+    private float maxhealth;
+    #endregion
 
     private void Start()
     {
+        maxhealth = health;
         // Instantiate the selected weapon when the game starts
         InstantiateSelectedWeapon();
+        healthBar.SetHealth(health, maxhealth);
     }
 
     private void InstantiateSelectedWeapon()
@@ -51,6 +60,7 @@ public class PlayerController : MonoBehaviour, IDamagable
     public void TakeDamage(int damage)
     {
         health -= damage;
+        healthBar.SetHealth(health, maxhealth);
         if (health <= 0)
         {
             Die();
@@ -59,22 +69,15 @@ public class PlayerController : MonoBehaviour, IDamagable
 
     void Die()
     {
-        gameObject.SetActive(false);
-        Debug.Log("GAME OVER");
+        animator.Play("Die");
+        EventManager.TriggerPlayerKilledEvent();
+        //StartCoroutine(DeactivateAfterDeath());
     }
-
-    //public virtual void Die()
-    //{
-    //    isDead = true;
-    //    isAttacking = false;
-    //    PlayDeathAnimation();
-    //    StartCoroutine(DeactivateAfterDeath());
-    //}
 
     // Coroutine to deactivate zombie after death animation
     private IEnumerator DeactivateAfterDeath()
     {
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(1f);
         gameObject.SetActive(false);
     }
 }

@@ -14,7 +14,6 @@ public class Smg : Weapon
         if (!CanFire()) return;
 
         lastShotTime = Time.time;  // Update shot time
-        currentAmmo--;
 
         // Logic to shoot a bullet (single shot)
         ShootBullet();
@@ -24,16 +23,4 @@ public class Smg : Weapon
             StartCoroutine(Reload());
         }
     }
-
-    //private void ShootBullet()
-    //{
-    //    Bullet bullet = objectPool.GetPooledObject();
-    //    if (bullet != null)
-    //    {
-    //        bullet.transform.position = bulletSpawnPoint.position;
-    //        bullet.transform.rotation = bulletSpawnPoint.rotation;
-    //        bullet.SetupBullet(weaponSO.bulletSpeed, weaponSO.damage);
-    //        bullet.gameObject.SetActive(true);
-    //    }
-    //}
 }

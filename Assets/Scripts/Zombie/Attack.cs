@@ -4,19 +4,24 @@ using UnityEngine;
 
 public class Attack : MonoBehaviour {
 
-    void OnTriggerEnter2D(Collider2D col)
-    {
-        if (col.gameObject.GetComponent<PlayerController>()!=null)
-        {
-            //Zombie.isAttacking = true;
-        }
-    }
+    [SerializeField] private Zombie zombie;
+    [SerializeField] private LayerMask whatIsPlayer;
+    //void OnTriggerEnter2D(Collider2D col)
+    //{
+    //    PlayerController playerController = col.gameObject.GetComponent<PlayerController>();
+    //    if (playerController != null)
+    //    {
+    //        Debug.Log("AYAYAYAYAYAYA");
+    //        playerController.TakeDamage(zombie.GetDamage());
+    //    }
+    //}
 
-    void OnTriggerExit2D(Collider2D col)
+    private void Update()
     {
-        if (col.gameObject.GetComponent<PlayerController>() != null)
-        {
-            //Zombie.isAttacking = false;
-        }
+        //Collider2D[] playerToDamage = Physics2D.OverlapCircleAll(transform.position, .5f, whatIsPlayer);
+        //for(int i = 0; i < playerToDamage.Length; i++)
+        //{
+        //    playerToDamage[i].GetComponent<PlayerController>().TakeDamage(zombie.GetDamage());
+        //}
     }
 }

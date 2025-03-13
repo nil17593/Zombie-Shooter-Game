@@ -15,7 +15,6 @@ public class Pistol : Weapon
         if (!CanFire()) return;
 
         lastShotTime = Time.time;  // Update shot time
-        currentAmmo--;
 
         // Logic to shoot a bullet (single shot)
         ShootBullet();
