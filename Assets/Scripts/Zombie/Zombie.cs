@@ -19,7 +19,6 @@ namespace SuperGaming.ZombieShooter.Zombie
         public HealthBar healthBar;
         public LayerMask whatIsPlayer;
 
-
         #region protected properties
         protected float moveSpeed;
         protected float attackCooldown;
@@ -32,69 +31,87 @@ namespace SuperGaming.ZombieShooter.Zombie
         protected float attackCooldownTimer;
         protected Rigidbody2D m_rb2D;
         protected Vector2 moveDirection;
+        protected Transform playerTransform; // Reference to player's position
         #endregion
 
         #region Cached data
         protected int m_initialHealth;
         PlayerController PlayerController;
         #endregion
+
         private void Awake()
         {
             anim = GetComponent<Animator>();
             m_rb2D = GetComponent<Rigidbody2D>();
         }
 
-        public virtual void Start()
+        protected virtual void Start()
         {
             Initialize(zombieScriptableObject);
+            PlayerController = FindObjectOfType<PlayerController>();
+            if (PlayerController != null)
+            {
+                playerTransform = PlayerController.transform;  // Cache player's transform for movement and attack
+            }
         }
 
-        // Initialize zombie stats from the ScriptableObject
         public void Initialize(ZombieScriptableObject zombieScriptableObject)
         {
             health = zombieScriptableObject.health;
             moveSpeed = zombieScriptableObject.moveSpeed;
             attackCooldown = zombieScriptableObject.attackCooldown;
             attackDamage = zombieScriptableObject.damage;
-            attackCooldownTimer = attackCooldown;
             attackRange = zombieScriptableObject.attackRange;
             isAttacking = false;
             isDead = false;
+            attackCooldownTimer = attackCooldown;
             m_initialHealth = health;
             healthBar.SetHealth(health, m_initialHealth);
         }
 
-        public virtual void Update()
+        protected virtual void Update()
         {
             if (isDead) return;
             HandleAttack();
         }
 
-        private void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
             if (isDead) return;
             HandleMovement();
         }
 
-        // Move the zombie toward the player
-        protected void HandleMovement()
+        protected virtual void HandleMovement()
         {
-            if (!isAttacking)
+            if (!isAttacking && playerTransform != null)
             {
-                m_rb2D.velocity = new Vector2(-moveSpeed, m_rb2D.velocity.y);
+                float distanceToPlayer = Vector2.Distance(transform.position, playerTransform.position);
+
+                // Check if zombie is within attack range
+                if (distanceToPlayer > attackRange)
+                {
+                    // Move towards player
+                    Vector2 direction = (playerTransform.position - transform.position).normalized;
+                    m_rb2D.velocity = new Vector2(direction.x * moveSpeed, m_rb2D.velocity.y);
+                    anim.SetBool("Walk", true);
+                }
+                else
+                {
+                    // Stop moving if within attack range
+                    m_rb2D.velocity = Vector2.zero;
+                    InitiateAttack();
+                }
             }
         }
 
-        // Start attacking the player
-        protected void StartAttack()
+        // Initiates the attack sequence
+        protected virtual void InitiateAttack()
         {
             isAttacking = true;
             PlayAttackAnimation();
-            attackCooldownTimer = 0;  // Reset attack cooldown timer
         }
 
-        // Handle attack cooldown and logic
-        protected void HandleAttack()
+        protected virtual void HandleAttack()
         {
             if (isAttacking)
             {
@@ -102,19 +119,30 @@ namespace SuperGaming.ZombieShooter.Zombie
 
                 if (attackCooldownTimer <= 0)
                 {
-                    Attack();
-                    attackCooldownTimer = attackCooldown;  // Reset for next attack
+                    attackCooldownTimer = attackCooldown;
+                    ExecuteAttack();
+                }
+
+                // If player moves out of range, stop attacking and start moving again
+                if (playerTransform != null)
+                {
+                    float distanceToPlayer = Vector2.Distance(transform.position, playerTransform.position);
+                    if (distanceToPlayer > attackRange)
+                    {
+                        StopAttack();
+                    }
                 }
             }
         }
 
-        // Attack the player (can be customized in variants)
-        public virtual void Attack()
+        protected virtual void ExecuteAttack()
         {
-            PlayerController.TakeDamage(attackDamage);
+            if (PlayerController != null && !isDead)
+            {
+                PlayerController.TakeDamage(attackDamage);
+            }
         }
 
-        // Take damage and handle zombie death
         public void TakeDamage(int amount)
         {
             if (isDead) return;
@@ -127,8 +155,7 @@ namespace SuperGaming.ZombieShooter.Zombie
             }
         }
 
-        // Handle zombie death
-        public virtual void Die()
+        protected virtual void Die()
         {
             isDead = true;
             isAttacking = false;
@@ -136,7 +163,6 @@ namespace SuperGaming.ZombieShooter.Zombie
             StartCoroutine(DeactivateAfterDeath());
         }
 
-        // Coroutine to deactivate zombie after death animation
         private IEnumerator DeactivateAfterDeath()
         {
             PlayDeathAnimation();
@@ -147,6 +173,22 @@ namespace SuperGaming.ZombieShooter.Zombie
             gameObject.SetActive(false);
         }
 
+        protected virtual void ResetToUseFromPoolAgain()
+        {
+            health = m_initialHealth;
+            m_rb2D.velocity = Vector2.zero;
+            anim.Rebind();
+            isAttacking = false;
+            isDead = false;
+        }
+
+        #region Animations
+        protected virtual void StopAttack()
+        {
+            isAttacking = false;
+            anim.SetBool("Attack", false);
+            anim.SetBool("Walk", true);
+        }
 
         protected virtual void PlayAttackAnimation()
         {
@@ -160,26 +202,6 @@ namespace SuperGaming.ZombieShooter.Zombie
             anim.SetBool("Walk", false);
             anim.SetTrigger("death_02");
         }
-
-        //reset evrything so that we can use this agin from object pool
-        protected virtual void ResetToUseFromPoolAgain()
-        {
-            health = m_initialHealth;
-            m_rb2D.velocity = Vector2.zero;
-            anim.Rebind();
-            isAttacking = false;
-            isDead = false;
-        }
-
-        // Detect player entering attack range using trigger
-        private void OnTriggerEnter2D(Collider2D other)
-        {
-            PlayerController playerController = other.GetComponent<PlayerController>();
-            if (playerController != null && !isAttacking)
-            {
-                PlayerController = playerController;
-                StartAttack();
-            }
-        }
+        #endregion
     }
 }

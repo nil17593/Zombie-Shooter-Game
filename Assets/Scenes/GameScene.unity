@@ -2520,7 +2520,7 @@ MonoBehaviour:
   initialWaveSize: 8
   timeBetweenWaves: 5
   maxWaves: 3
-  zombieIncreaseCountPerWave: 6
+  zombieIncreaseCountPerWave: 5
   zombieSpawnArea: {fileID: 1521987267}
   allWavesCompleted: 0
 --- !u!4 &1570902567

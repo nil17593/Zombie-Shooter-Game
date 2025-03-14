@@ -23,7 +23,7 @@ namespace SuperGaming.ZombieShooter.Zombie
             else
             {
                 // Attack the player
-                zombie.Attack();
+                //zombie.ExecuteAttack();
                 //attackCooldownTimer = zombie.attackCooldown;  // Reset the attack cooldown
             }
 

@@ -11,17 +11,17 @@ namespace SuperGaming.ZombieShooter.Zombie
     /// </summary>
     public class BigZombie : Zombie
     {
-        public override void Start()
+        protected override void Start()
         {
             base.Start();
         }
 
-        public override void Attack()
+        protected override void ExecuteAttack()
         {
-            base.Attack();
+            base.ExecuteAttack();
         }
 
-        public override void Die()
+        protected override void Die()
         {
             base.Die();
         }

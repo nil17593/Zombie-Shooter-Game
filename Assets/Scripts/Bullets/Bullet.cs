@@ -16,10 +16,11 @@ namespace SuperGaming.ZombieShooter.Weapons
         private Vector2 m_initialiPos;
         private Rigidbody2D rb;
         #endregion
-
+        private bool hasHitZombie = false;
         void OnEnable()
         {
             rb = GetComponent<Rigidbody2D>();
+            hasHitZombie = false;
         }
         public void SetupBullet(float newSpeed, int newDamage)
         {
@@ -31,10 +32,18 @@ namespace SuperGaming.ZombieShooter.Weapons
 
         private void OnTriggerEnter2D(Collider2D other)
         {
+            if (hasHitZombie)
+            {
+                gameObject.SetActive(false);
+                return;
+            }
+
             Zombie.Zombie zombie = other.GetComponent<Zombie.Zombie>();
             if (zombie != null)
             {
                 zombie.TakeDamage(damage);
+                hasHitZombie = true; // Mark the bullet as having hit a zombie
+                transform.position = m_initialiPos;
             }
             transform.position = m_initialiPos;
             gameObject.SetActive(false);
