@@ -1578,6 +1578,7 @@ GameObject:
   - component: {fileID: 6301919647653679662}
   - component: {fileID: 2898658161470140654}
   - component: {fileID: 8738818075637709204}
+  - component: {fileID: 7455722171903997735}
   m_Layer: 6
   m_Name: BigZombie
   m_TagString: Untagged
@@ -1702,6 +1703,41 @@ MonoBehaviour:
   whatIsPlayer:
     serializedVersion: 2
     m_Bits: 128
+--- !u!58 &7455722171903997735
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8028504333613449318}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 256
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 2.7, y: 0}
+  serializedVersion: 2
+  m_Radius: 1.99
 --- !u!1 &8539148842809538833
 GameObject:
   m_ObjectHideFlags: 0

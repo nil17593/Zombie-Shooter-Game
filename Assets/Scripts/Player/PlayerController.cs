@@ -1,83 +1,85 @@
 ﻿using System.Collections;
-using SuperGaming.ZombieShooter.Event;
+using SuperGaming.ZombieShooter.Controllers;
+using SuperGaming.ZombieShooter.Events;
+using SuperGaming.ZombieShooter.UI;
+using SuperGaming.ZombieShooter.Weapons;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour, IDamagable
+namespace SuperGaming.ZombieShooter.Player
 {
-    [Header("Player Settings")]
-    [SerializeField] private Transform weaponSpawnPoint; // Where the weapon will appear
-    [SerializeField] private float health = 100;
-    [SerializeField] private HealthBar healthBar;
-    [SerializeField] private Animator animator;
-
-    #region Cached data
-    private Weapon currentWeapon; // Store the currently selected weapon
-    private float maxhealth;
-    #endregion
-
-    private void Start()
+    public class PlayerController : MonoBehaviour, IDamagable
     {
-        maxhealth = health;
-        // Instantiate the selected weapon when the game starts
-        InstantiateSelectedWeapon();
-        healthBar.SetHealth(health, maxhealth);
-    }
+        [Header("Player Settings")]
+        [SerializeField] private Transform weaponSpawnPoint; // Where the weapon will appear
+        [SerializeField] private float health = 100;
+        [SerializeField] private HealthBar healthBar;
+        [SerializeField] private Animator animator;
 
-    private void InstantiateSelectedWeapon()
-    {
-        // Get the currently selected weapon from GameplayController
-        if (GameplayController.Instance != null)
+        #region Cached data
+        private Weapon currentWeapon; // Store the currently selected weapon
+        private float maxhealth;
+        #endregion
+
+        private void Start()
         {
-            GameObject weaponPrefab = GameplayController.Instance.GetCurrentWeaponPrefab();
+            maxhealth = health;
+            // Instantiate the selected weapon when the game starts
+            InstantiateSelectedWeapon();
+            healthBar.SetHealth(health, maxhealth);
+        }
 
-            if (weaponPrefab != null)
+        private void InstantiateSelectedWeapon()
+        {
+            // Get the currently selected weapon from GameplayController
+            if (GameplayController.Instance != null)
             {
-                // Instantiate the weapon at the spawn point
-                GameObject weaponObject = Instantiate(weaponPrefab, weaponSpawnPoint.position, weaponSpawnPoint.rotation, weaponSpawnPoint);
-                currentWeapon = weaponObject.GetComponent<Weapon>(); // Get the Weapon component from the instantiated object
+                GameObject weaponPrefab = GameplayController.Instance.GetCurrentWeaponPrefab();
 
-                if (currentWeapon != null)
+                if (weaponPrefab != null)
                 {
-                    Debug.Log("Equipped Weapon: " + currentWeapon.name);
+                    // Instantiate the weapon at the spawn point
+                    GameObject weaponObject = Instantiate(weaponPrefab, weaponSpawnPoint.position, weaponSpawnPoint.rotation, weaponSpawnPoint);
+                    currentWeapon = weaponObject.GetComponent<Weapon>(); // Get the Weapon component from the instantiated object
+
+                    if (currentWeapon != null)
+                    {
+                        Debug.Log("Equipped Weapon: " + currentWeapon.name);
+                    }
+                    else
+                    {
+                        Debug.LogWarning("Weapon component not found on the instantiated weapon prefab.");
+                    }
                 }
                 else
                 {
-                    Debug.LogWarning("Weapon component not found on the instantiated weapon prefab.");
+                    Debug.LogWarning("No weapon prefab found in GameplayController!");
                 }
             }
             else
             {
-                Debug.LogWarning("No weapon prefab found in GameplayController!");
+                Debug.LogWarning("GameplayController is null");
+
             }
         }
-        else
+
+        public void TakeDamage(int damage)
         {
-            Debug.LogWarning("GameplayController is null");
-
+            health -= damage;
+            healthBar.SetHealth(health, maxhealth);
+            if (health <= 0)
+            {
+                if (GameplayController.Instance != null)
+                {
+                    GameplayController.Instance.IsGameOver = true;
+                }
+                Die();
+            }
         }
-    }
 
-    public void TakeDamage(int damage)
-    {
-        health -= damage;
-        healthBar.SetHealth(health, maxhealth);
-        if (health <= 0)
+        void Die()
         {
-            Die();
+            animator.Play("Die");
+            EventManager.TriggerPlayerKilledEvent();
         }
-    }
-
-    void Die()
-    {
-        animator.Play("Die");
-        EventManager.TriggerPlayerKilledEvent();
-        //StartCoroutine(DeactivateAfterDeath());
-    }
-
-    // Coroutine to deactivate zombie after death animation
-    private IEnumerator DeactivateAfterDeath()
-    {
-        yield return new WaitForSeconds(1f);
-        gameObject.SetActive(false);
     }
 }

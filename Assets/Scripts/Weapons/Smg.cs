@@ -2,25 +2,39 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Smg : Weapon
+namespace SuperGaming.ZombieShooter.Weapons
 {
-    protected override void Start()
+    /// <summary>
+    /// SMG class derived from base weapon class
+    /// </summary>
+    public class Smg : Weapon
     {
-        base.Start();  // Initialize base class variables
-    }
-
-    public override void Fire()
-    {
-        if (!CanFire()) return;
-
-        lastShotTime = Time.time;  // Update shot time
-
-        // Logic to shoot a bullet (single shot)
-        ShootBullet();
-
-        if (currentAmmo <= 0)
+        protected override void Start()
         {
-            StartCoroutine(Reload());
+            base.Start();  // Initialize base class variables
+        }
+        private void Update()
+        {
+            if (Input.GetMouseButton(0))  // Hold down the fire button for automatic fire
+            {
+                if (CanFire())
+                {
+                    Fire();
+                }
+            }
+        }
+        public override void Fire()
+        {
+            if (!CanFire()) return;
+
+            lastShotTime = Time.time;  // Update shot time
+
+            ShootBullet();
+
+            if (currentAmmo <= 0)
+            {
+                StartCoroutine(Reload());
+            }
         }
     }
 }

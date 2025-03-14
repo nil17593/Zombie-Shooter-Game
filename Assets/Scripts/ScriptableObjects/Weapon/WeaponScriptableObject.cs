@@ -1,7 +1,12 @@
+using SuperGaming.ZombieShooter.Enums;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// this is scriptable object to store the weapon data
+/// we can create many type of weapons using this
+/// </summary>
 [CreateAssetMenu(fileName = "New Weapon", menuName = "WeaponScriptableObject/WeaponData")]
 public class WeaponScriptableObject : ScriptableObject
 {

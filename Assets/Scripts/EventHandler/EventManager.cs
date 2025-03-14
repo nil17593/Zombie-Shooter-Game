@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SuperGaming.ZombieShooter.Event
+namespace SuperGaming.ZombieShooter.Events
 {
     /// <summary>
     /// This is the event Manager class gets different created events and triggers them when needed
@@ -12,7 +12,7 @@ namespace SuperGaming.ZombieShooter.Event
         public static event Action OnPlayerKilled;
         public static event Action OnAllZombiesKilled;
         public static event Action<int> OnAllZombieWavesSpawned;
-        public static event Action OnZombieKilled;
+        public static event Action<Zombie.Zombie> OnZombieKilled;
 
         // Trigger the PlayerKilled event
         public static void TriggerPlayerKilledEvent()
@@ -30,9 +30,9 @@ namespace SuperGaming.ZombieShooter.Event
         {
             OnAllZombieWavesSpawned?.Invoke(count);
         }
-        public static void TriggerZombieKilledEvent()
+        public static void TriggerZombieKilledEvent(Zombie.Zombie zombie)
         {
-            OnZombieKilled?.Invoke();
+            OnZombieKilled?.Invoke(zombie);
         }
     }
 }

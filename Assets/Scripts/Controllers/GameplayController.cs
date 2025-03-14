@@ -1,87 +1,113 @@
 using UnityEngine;
 using System.Collections.Generic;
-using SuperGaming.ZombieShooter.Event;
+using SuperGaming.ZombieShooter.Events;
+using SuperGaming.ZombieShooter.Weapons;
+using SuperGaming.ZombieShooter.Enums;
 
-public class GameplayController : Singletone<GameplayController>
+namespace SuperGaming.ZombieShooter.Controllers
 {
-    private const string SELECTED_WEAPON_KEY = "SelectedWeapon";
-
-    [SerializeField] private Weapon[] weapons;
-    private Dictionary<WeaponType, Weapon> weaponDictionary;
-
-    public Weapon SelectedWeapon { get; private set; }
-    public int TotalZombiesToKill { get; set; }
-    public int TotalZombiesKilled { get; set; }
-
-    private void OnEnable()
+    /// <summary>
+    /// this is manager class for the game cycle
+    /// all the things are managed in this
+    /// weapon slection,count for kill the zombies to win
+    /// </summary>
+    public class GameplayController : Singletone<GameplayController>
     {
-        EventManager.OnAllZombieWavesSpawned += CheckForGameWin;
-    }
+        private const string SELECTED_WEAPON_KEY = "SelectedWeapon";
 
-    private void Start()
-    {
-        InitializeWeaponDictionary();
-        LoadSelectedWeapon();
-    }
+        [SerializeField] private Weapon[] weapons;
+        private Dictionary<WeaponType, Weapon> weaponDictionary;
 
-    private void InitializeWeaponDictionary()
-    {
-        weaponDictionary = new Dictionary<WeaponType, Weapon>();
+        #region Properties
+        public Weapon SelectedWeapon { get; private set; }
+        public int TotalZombiesToKill { get; set; }
+        public int TotalZombiesKilled { get; set; }
+        public bool IsGameOver { get; set; }
+        public bool IsAllWavesSpwned { get; set; }
+        #endregion
 
-        foreach (var weapon in weapons)
+        private void OnEnable()
         {
-            weaponDictionary[weapon.weaponSO.weaponType] = weapon;
-        }
-    }
-
-    private void LoadSelectedWeapon()
-    {
-        var savedWeaponType = GetSelectedWeaponType();
-
-        if (!weaponDictionary.TryGetValue(savedWeaponType, out var savedWeapon))
-        {
-            Debug.LogWarning("Saved weapon not found, defaulting to first weapon.");
-            savedWeapon = weapons[0];
+            //EventManager.OnAllZombieWavesSpawned += CheckForGameWin;
         }
 
-        SelectedWeapon = savedWeapon;
-    }
-
-    public void SetSelectedWeaponType(WeaponType weaponType)
-    {
-        PlayerPrefs.SetInt(SELECTED_WEAPON_KEY, (int)weaponType);
-        PlayerPrefs.Save();
-
-        if (weaponDictionary.TryGetValue(weaponType, out var selectedWeapon))
+        private void Start()
         {
-            SelectedWeapon = selectedWeapon;
+            InitializeWeaponDictionary();
+            LoadSelectedWeapon();
         }
-        else
+
+        private void InitializeWeaponDictionary()
         {
-            Debug.LogWarning("Selected weapon type not found in dictionary!");
+            weaponDictionary = new Dictionary<WeaponType, Weapon>();
+
+            foreach (var weapon in weapons)
+            {
+                weaponDictionary[weapon.weaponSO.weaponType] = weapon;
+            }
         }
-    }
 
-    public WeaponType GetSelectedWeaponType()
-    {
-        int savedWeaponIndex = PlayerPrefs.GetInt(SELECTED_WEAPON_KEY, 0);
-        return (WeaponType)savedWeaponIndex;
-    }
-
-    public GameObject GetCurrentWeaponPrefab()
-    {
-        return SelectedWeapon?.gameObject ?? weapons[0].gameObject;
-    }
-    public void CheckForGameOver()
-    {
-
-    }
-
-    public void CheckForGameWin(int count)
-    {
-        if (TotalZombiesKilled >= count)
+        private void LoadSelectedWeapon()
         {
-            EventManager.TriggerAllZombiesKilledEvent();
+            var savedWeaponType = GetSelectedWeaponType();
+
+            if (!weaponDictionary.TryGetValue(savedWeaponType, out var savedWeapon))
+            {
+                Debug.LogWarning("Saved weapon not found, defaulting to first weapon.");
+                savedWeapon = weapons[0];
+            }
+
+            SelectedWeapon = savedWeapon;
+        }
+
+        public void SetSelectedWeaponType(WeaponType weaponType)
+        {
+            PlayerPrefs.SetInt(SELECTED_WEAPON_KEY, (int)weaponType);
+            PlayerPrefs.Save();
+
+            if (weaponDictionary.TryGetValue(weaponType, out var selectedWeapon))
+            {
+                SelectedWeapon = selectedWeapon;
+            }
+            else
+            {
+                Debug.LogWarning("Selected weapon type not found in dictionary!");
+            }
+        }
+
+        public WeaponType GetSelectedWeaponType()
+        {
+            int savedWeaponIndex = PlayerPrefs.GetInt(SELECTED_WEAPON_KEY, 0);
+            return (WeaponType)savedWeaponIndex;
+        }
+
+        public GameObject GetCurrentWeaponPrefab()
+        {
+            return SelectedWeapon?.gameObject ?? weapons[0].gameObject;
+        }
+        public void CheckForGameOver()
+        {
+
+        }
+
+        public void CheckForGameWin()
+        {
+            TotalZombiesKilled++;
+            if (IsAllWavesSpwned)
+            {
+                if (TotalZombiesKilled >= TotalZombiesToKill)
+                {
+                    EventManager.TriggerAllZombiesKilledEvent();
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            IsGameOver = false;
+            IsAllWavesSpwned = false;
+            TotalZombiesKilled = 0;
+            TotalZombiesToKill = 0;
         }
     }
 }

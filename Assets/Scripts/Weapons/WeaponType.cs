@@ -2,9 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum WeaponType
+namespace SuperGaming.ZombieShooter.Enums
 {
-    PISTOL,//0
-    SMG,//1
-    RIFLE//2
+    public enum WeaponType
+    {
+        PISTOL,//0
+        SMG,//1
+        RIFLE//2
+    }
 }

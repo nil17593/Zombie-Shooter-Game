@@ -1,69 +1,78 @@
-using SuperGaming.ZombieShooter.Event;
+using SuperGaming.ZombieShooter.Events;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class UIController : MonoBehaviour
+namespace SuperGaming.ZombieShooter.Controllers
 {
-    [SerializeField] private TextMeshProUGUI gunStateText;
-    [SerializeField] private TextMeshProUGUI waveText;
-
-    public static UIController Instance;
-
-    private void Awake()
+    /// <summary>
+    /// this is UI controller class
+    /// can be used to manage any type of in game UI
+    /// </summary>
+    public class UIController : MonoBehaviour
     {
-        if (Instance == null)
+        [Header("UI References")]
+        [SerializeField] private TextMeshProUGUI gunStateText;
+        [SerializeField] private TextMeshProUGUI waveText;
+        [SerializeField] private GameObject GameOverScreen;
+        [SerializeField] private GameObject GameWinScreen;
+        public static UIController Instance;
+
+        private void Awake()
         {
-            Instance = this;
+            if (Instance == null)
+            {
+                Instance = this;
+            }
         }
-    }
-    public void SetCurrentBulletText(int remainingBullets, int magSize, bool reloading = false)
-    {
-        if (reloading)
+        public void SetCurrentBulletText(int remainingBullets, int magSize, bool reloading = false)
         {
-            gunStateText.text = "Reloading....";
+            if (reloading)
+            {
+                gunStateText.text = "Reloading....";
+            }
+            else
+            {
+                gunStateText.text = remainingBullets + "/" + magSize;
+            }
         }
-        else
+
+        public void SetWaveText(int wavecount)
         {
-            gunStateText.text = remainingBullets + "/" + magSize;
+            waveText.text = "Wave " + wavecount;
         }
-    }
 
-    public void SetWaveText(int wavecount)
-    {
-        waveText.text = "Wave " + wavecount;
-    }
+        private void OnEnable()
+        {
+            EventManager.OnPlayerKilled += ShowGameOverScreen;
+            EventManager.OnAllZombiesKilled += ShowVictoryScreen;
+        }
 
-    private void OnEnable()
-    {
-        EventManager.OnPlayerKilled += ShowGameOverScreen;
-        EventManager.OnAllZombiesKilled += ShowVictoryScreen;
-    }
+        private void OnDisable()
+        {
+            EventManager.OnPlayerKilled -= ShowGameOverScreen;
+            EventManager.OnAllZombiesKilled -= ShowVictoryScreen;
+        }
 
-    private void OnDisable()
-    {
-        EventManager.OnPlayerKilled -= ShowGameOverScreen;
-        EventManager.OnAllZombiesKilled -= ShowVictoryScreen;
-    }
+        private void ShowGameOverScreen()
+        {
+            GameOverScreen.SetActive(true);
+        }
 
-    private void ShowGameOverScreen()
-    {
-        Debug.Log("Game Over: Player was killed!");
-        // Logic to display Game Over screen
-    }
+        private void ShowVictoryScreen()
+        {
+            GameWinScreen.SetActive(true);
+        }
 
-    private void ShowVictoryScreen()
-    {
-        Debug.Log("Victory: All zombies were killed!");
-        // Logic to display Victory screen
-    }
-
-    public void OnMenuClicked()
-    {
-        SceneManager.LoadScene("MenuScene");
-    }
-    public void OnRestartClicked()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        public void OnMenuClicked()
+        {
+            SceneManager.LoadScene("MenuScene");
+            GameplayController.Instance.Reset();
+        }
+        public void OnRestartClicked()
+        {
+            GameplayController.Instance.Reset();
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
 }

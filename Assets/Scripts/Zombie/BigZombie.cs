@@ -2,20 +2,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BigZombie : Zombie
+namespace SuperGaming.ZombieShooter.Zombie
 {
-    public override void Start()
+    /// <summary>
+    /// this is Big Zombie class
+    /// all the functionalities are mentioned in the base class
+    /// we can override here
+    /// </summary>
+    public class BigZombie : Zombie
     {
-        base.Start();
-    }
+        public override void Start()
+        {
+            base.Start();
+        }
 
-    public override void Attack()
-    {
-        base.Attack();
-    }
+        public override void Attack()
+        {
+            base.Attack();
+        }
 
-    public override void Die()
-    {
-        base.Die();
+        public override void Die()
+        {
+            base.Die();
+        }
     }
 }

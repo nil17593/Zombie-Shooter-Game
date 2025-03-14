@@ -1,17 +1,24 @@
 using UnityEngine.SceneManagement;
 using UnityEngine;
 
-public class MenuController : MonoBehaviour
+namespace SuperGaming.ZombieShooter.Controllers
 {
-    [SerializeField] private GameObject shopScreen;
-
-    public void OnPlayButtonClicked()
+    /// <summary>
+    /// this class is attached on Menu scene
+    /// handles loading the shop screen and load th game scene
+    /// </summary>
+    public class MenuController : MonoBehaviour
     {
-        SceneManager.LoadScene("GameScene");
-    }
+        [SerializeField] private GameObject shopScreen;
 
-    public void OnShopButtonClicked()
-    {
-        shopScreen.SetActive(true);
+        public void OnPlayButtonClicked()
+        {
+            SceneManager.LoadScene("GameScene");
+        }
+
+        public void OnShopButtonClicked()
+        {
+            shopScreen.SetActive(true);
+        }
     }
 }

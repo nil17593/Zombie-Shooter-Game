@@ -1,186 +1,185 @@
 using System.Collections;
 using UnityEngine;
-using SuperGaming.ZombieShooter.Event;
+using SuperGaming.ZombieShooter.Events;
+using SuperGaming.ZombieShooter.Player;
+using SuperGaming.ZombieShooter.Controllers;
+using SuperGaming.ZombieShooter.UI;
 
-[RequireComponent(typeof(Rigidbody2D))]
-public abstract class Zombie : MonoBehaviour, IDamagable
+namespace SuperGaming.ZombieShooter.Zombie
 {
-    [Header("Scriptable object for zombie")]
-    public ZombieScriptableObject zombieScriptableObject;
-    public HealthBar healthBar;
-    public LayerMask whatIsPlayer;
-
-
-    #region protected properties
-
-    protected float moveSpeed;
-    protected float attackCooldown;
-    protected int attackDamage;
-    protected int health;
-    protected float attackRange;
-    protected bool isAttacking;
-    protected bool isDead;
-    protected Animator anim;
-    protected float attackCooldownTimer;
-    protected Rigidbody2D m_rb2D;
-    protected Vector2 moveDirection;
-    #endregion
-
-    #region Cached data
-    protected int m_initialHealth;
-    #endregion
-    private float checkInterval = 0.1f;
-    private float checkTimer = 0f;
-    private void Awake()
+    /// <summary>
+    /// this is the base zombie class
+    /// takes scriptbale object data to create zombie
+    /// </summary>
+    [RequireComponent(typeof(Rigidbody2D))]
+    public abstract class Zombie : MonoBehaviour, IDamagable
     {
-        anim = GetComponent<Animator>();
-        m_rb2D = GetComponent<Rigidbody2D>();
-    }
+        [Header("Scriptable object for zombie")]
+        public ZombieScriptableObject zombieScriptableObject;
+        public HealthBar healthBar;
+        public LayerMask whatIsPlayer;
 
-    public virtual void Start()
-    {
-        Initialize(zombieScriptableObject);
-    }
 
-    // Initialize zombie stats from the ScriptableObject
-    public void Initialize(ZombieScriptableObject zombieScriptableObject)
-    {
-        health = zombieScriptableObject.health;
-        moveSpeed = zombieScriptableObject.moveSpeed;
-        attackCooldown = zombieScriptableObject.attackCooldown;
-        attackDamage = zombieScriptableObject.damage;
-        attackCooldownTimer = attackCooldown;
-        attackRange = zombieScriptableObject.attackRange;
-        isAttacking = false;
-        isDead = false;
-        m_initialHealth = health;
-        healthBar.SetHealth(health, m_initialHealth);
-    }
+        #region protected properties
+        protected float moveSpeed;
+        protected float attackCooldown;
+        protected int attackDamage;
+        protected int health;
+        protected float attackRange;
+        protected bool isAttacking;
+        protected bool isDead;
+        protected Animator anim;
+        protected float attackCooldownTimer;
+        protected Rigidbody2D m_rb2D;
+        protected Vector2 moveDirection;
+        #endregion
 
-    public virtual void Update()
-    {
-        if (isDead) return;
-        checkTimer -= Time.deltaTime;
-        if (checkTimer <= 0)
+        #region Cached data
+        protected int m_initialHealth;
+        PlayerController PlayerController;
+        #endregion
+        private void Awake()
         {
-            CheckForPlayerInRange();
-            checkTimer = checkInterval;
+            anim = GetComponent<Animator>();
+            m_rb2D = GetComponent<Rigidbody2D>();
         }
-        HandleAttack();
-    }
 
-    private void FixedUpdate()
-    {
-        if (isDead) return;
-        HandleMovement();
-    }
-
-    // Move the zombie toward the player
-    protected void HandleMovement()
-    {
-        if (!isAttacking)
-        {          
-            m_rb2D.velocity = new Vector2(-moveSpeed, m_rb2D.velocity.y);
-        }
-    }
-
-    // Check if the player is in attack range and start the attack
-    protected void CheckForPlayerInRange()
-    {
-        // Using Physics2D.OverlapCircle to check if the player is within the attack range
-        Collider2D playerInRange = Physics2D.OverlapCircle(transform.position, attackRange, whatIsPlayer);
-        if (playerInRange != null && !isAttacking)
+        public virtual void Start()
         {
-            m_rb2D.velocity = Vector2.zero; // Stop moving when attacking
-            StartAttack();
+            Initialize(zombieScriptableObject);
         }
-    }
 
-    // Start attacking the player
-    protected void StartAttack()
-    {
-        isAttacking = true; 
-        PlayAttackAnimation();
-        attackCooldownTimer = attackCooldown;  // Reset attack cooldown timer
-    }
-
-    // Handle attack cooldown and logic
-    protected void HandleAttack()
-    {
-        if (isAttacking)
+        // Initialize zombie stats from the ScriptableObject
+        public void Initialize(ZombieScriptableObject zombieScriptableObject)
         {
-            attackCooldownTimer -= Time.deltaTime;
+            health = zombieScriptableObject.health;
+            moveSpeed = zombieScriptableObject.moveSpeed;
+            attackCooldown = zombieScriptableObject.attackCooldown;
+            attackDamage = zombieScriptableObject.damage;
+            attackCooldownTimer = attackCooldown;
+            attackRange = zombieScriptableObject.attackRange;
+            isAttacking = false;
+            isDead = false;
+            m_initialHealth = health;
+            healthBar.SetHealth(health, m_initialHealth);
+        }
 
-            if (attackCooldownTimer <= 0)
+        public virtual void Update()
+        {
+            if (isDead) return;
+            HandleAttack();
+        }
+
+        private void FixedUpdate()
+        {
+            if (isDead) return;
+            HandleMovement();
+        }
+
+        // Move the zombie toward the player
+        protected void HandleMovement()
+        {
+            if (!isAttacking)
             {
-                Attack();
-                attackCooldownTimer = attackCooldown;  // Reset for next attack
+                m_rb2D.velocity = new Vector2(-moveSpeed, m_rb2D.velocity.y);
             }
         }
-    }
 
-    // Attack the player (can be customized in variants)
-    public virtual void Attack()
-    {
-        //custom logic for attack seprately
-        Collider2D[] playerToDamage = Physics2D.OverlapCircleAll(transform.position, attackRange, whatIsPlayer);
-        for (int i = 0; i < playerToDamage.Length; i++)
+        // Start attacking the player
+        protected void StartAttack()
         {
-            playerToDamage[i].GetComponent<PlayerController>().TakeDamage(attackDamage);
+            isAttacking = true;
+            PlayAttackAnimation();
+            attackCooldownTimer = 0;  // Reset attack cooldown timer
         }
-    }
 
-    // Take damage and handle zombie death
-    public void TakeDamage(int amount)
-    {
-        if (isDead) return;
-        anim.SetTrigger("hurt");
-        health -= amount;
-        healthBar.SetHealth(health, m_initialHealth);
-        if (health <= 0)
+        // Handle attack cooldown and logic
+        protected void HandleAttack()
         {
-            Die();
+            if (isAttacking)
+            {
+                attackCooldownTimer -= Time.deltaTime;
+
+                if (attackCooldownTimer <= 0)
+                {
+                    Attack();
+                    attackCooldownTimer = attackCooldown;  // Reset for next attack
+                }
+            }
         }
-    }
 
-    // Handle zombie death
-    public virtual void Die()
-    {
-        isDead = true;
-        isAttacking = false;
-        GameplayController.Instance.TotalZombiesKilled++;
-        EventManager.TriggerZombieKilledEvent();
-        StartCoroutine(DeactivateAfterDeath());
-    }
+        // Attack the player (can be customized in variants)
+        public virtual void Attack()
+        {
+            PlayerController.TakeDamage(attackDamage);
+        }
 
-    // Coroutine to deactivate zombie after death animation
-    private IEnumerator DeactivateAfterDeath()
-    {
-        PlayDeathAnimation();
-        yield return new WaitForSeconds(1f);
-        transform.rotation = Quaternion.identity;
-        ResetToUseFromPoolAgain();
-        gameObject.SetActive(false);
-    }
+        // Take damage and handle zombie death
+        public void TakeDamage(int amount)
+        {
+            if (isDead) return;
+            anim.SetTrigger("hurt");
+            health -= amount;
+            healthBar.SetHealth(health, m_initialHealth);
+            if (health <= 0)
+            {
+                Die();
+            }
+        }
+
+        // Handle zombie death
+        public virtual void Die()
+        {
+            isDead = true;
+            isAttacking = false;
+            EventManager.TriggerZombieKilledEvent(this);
+            StartCoroutine(DeactivateAfterDeath());
+        }
+
+        // Coroutine to deactivate zombie after death animation
+        private IEnumerator DeactivateAfterDeath()
+        {
+            PlayDeathAnimation();
+            yield return new WaitForSeconds(1f);
+            GameplayController.Instance.CheckForGameWin();
+            transform.rotation = Quaternion.identity;
+            ResetToUseFromPoolAgain();
+            gameObject.SetActive(false);
+        }
 
 
-    protected virtual void PlayAttackAnimation()
-    {
-        anim.SetBool("Attack", true);
-        anim.SetBool("Walk", false);
-    }
+        protected virtual void PlayAttackAnimation()
+        {
+            anim.SetBool("Attack", true);
+            anim.SetBool("Walk", false);
+        }
 
-    protected virtual void PlayDeathAnimation()
-    {
-        anim.SetBool("Attack", false);
-        anim.SetBool("Walk", false);
-        anim.SetTrigger("death_02");
-    }
+        protected virtual void PlayDeathAnimation()
+        {
+            anim.SetBool("Attack", false);
+            anim.SetBool("Walk", false);
+            anim.SetTrigger("death_02");
+        }
 
-    //reset evrything so that we can use this agin from object pool
-    protected virtual void ResetToUseFromPoolAgain()
-    {
-        health = m_initialHealth;
-        anim.Rebind();
+        //reset evrything so that we can use this agin from object pool
+        protected virtual void ResetToUseFromPoolAgain()
+        {
+            health = m_initialHealth;
+            m_rb2D.velocity = Vector2.zero;
+            anim.Rebind();
+            isAttacking = false;
+            isDead = false;
+        }
+
+        // Detect player entering attack range using trigger
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            PlayerController playerController = other.GetComponent<PlayerController>();
+            if (playerController != null && !isAttacking)
+            {
+                PlayerController = playerController;
+                StartAttack();
+            }
+        }
     }
 }

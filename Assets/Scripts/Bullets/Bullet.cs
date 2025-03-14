@@ -1,40 +1,43 @@
 using UnityEngine;
 
-public class Bullet : MonoBehaviour
+namespace SuperGaming.ZombieShooter.Weapons
 {
-    [SerializeField] private float speed;
-    [SerializeField] private int damage;
-
-    #region private properties
-    private Vector2 m_initialiPos;
-    private Rigidbody2D rb;
-    #endregion
-
-    void OnEnable()
+    /// <summary>
+    /// this class is attached on each bullet
+    /// bullets instantiating inside object pool and can be reuse
+    /// </summary>
+    public class Bullet : MonoBehaviour
     {
-        // Get Rigidbody2D and set bullet's velocity when activated
-        rb = GetComponent<Rigidbody2D>();
-    }
-    public void SetupBullet(float newSpeed, int newDamage)
-    {
-        speed = newSpeed;
-        damage = newDamage;
-        m_initialiPos = transform.position;
-        rb.velocity = Vector2.right * speed;
-    }
+        [Header("Bullet settings")]
+        [SerializeField] private float speed;
+        [SerializeField] private int damage;
 
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        Zombie zombie = other.GetComponent<Zombie>();
-        if (zombie != null)
+        #region private properties
+        private Vector2 m_initialiPos;
+        private Rigidbody2D rb;
+        #endregion
+
+        void OnEnable()
         {
-            zombie.TakeDamage(damage);           
+            rb = GetComponent<Rigidbody2D>();
         }
-        transform.position = m_initialiPos;
-        gameObject.SetActive(false);
-    }
-    private void OnDisable()
-    {
-        
+        public void SetupBullet(float newSpeed, int newDamage)
+        {
+            speed = newSpeed;
+            damage = newDamage;
+            m_initialiPos = transform.position;
+            rb.velocity = Vector2.right * speed;
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            Zombie.Zombie zombie = other.GetComponent<Zombie.Zombie>();
+            if (zombie != null)
+            {
+                zombie.TakeDamage(damage);
+            }
+            transform.position = m_initialiPos;
+            gameObject.SetActive(false);
+        }
     }
 }
