@@ -98,6 +98,7 @@ namespace SuperGaming.ZombieShooter.Zombie
                 else
                 {
                     // Stop moving if within attack range
+                    anim.SetBool("Walk", false);
                     m_rb2D.velocity = Vector2.zero;
                     InitiateAttack();
                 }
@@ -136,6 +137,12 @@ namespace SuperGaming.ZombieShooter.Zombie
         }
 
         protected virtual void ExecuteAttack()
+        {
+            // Trigger the attack animation on every attack cycle
+            PlayAttackAnimation();
+        }
+
+        public void DealDamage()
         {
             if (PlayerController != null && !isDead)
             {
@@ -192,8 +199,8 @@ namespace SuperGaming.ZombieShooter.Zombie
 
         protected virtual void PlayAttackAnimation()
         {
-            anim.SetBool("Attack", true);
-            anim.SetBool("Walk", false);
+            // Trigger the attack animation every time ExecuteAttack is called
+            anim.SetTrigger("attack");
         }
 
         protected virtual void PlayDeathAnimation()
